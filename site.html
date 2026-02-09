@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultoria de Infraestrutura de Redes | Soluções MikroTik</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Font Awesome for Icons (replacing SVG) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* Chart Container Strategy as requested */
+        .chart-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        
+        @media (min-width: 768px) {
+            .chart-wrapper {
+                height: 350px;
+            }
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .tech-grid {
+            background-image: radial-gradient(#cbd5e1 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+    </style>
+
+    <!-- Chosen Palette: Corporate Trust (Slate & Blue) -->
+    <!-- Application Structure Plan:
+        1. Hero Section: Immediate Hook based on report intro ("Sua rede aguenta?").
+        2. Dashboard Simulator (The 'Wow' Factor): Demonstrates "Controle & Gestão" immediately. A live chart showing traffic to prove the value of monitoring.
+        3. Interactive Pillars:
+           - Security: A simulation of firewall blocking.
+           - Availability: A simulation of Link Failover (Redundancy).
+           - Optimization: QoS visualization.
+        4. Why MikroTik: Feature comparison cards.
+        5. Contact: CTA.
+        Why this structure: Instead of reading abstract concepts, the user *sees* the network working. It builds trust by demonstrating technical competence visually.
+    -->
+    <!-- Visualization & Content Choices:
+        - Real-time Line Chart: Shows "Monitoramento Real-time". Goal: Demonstrate visibility.
+        - Bar Chart (Stacked): Shows "Firewall". Goal: Visualize blocked threats vs allowed traffic. Interaction: Toggle protection.
+        - Doughnut Chart: Shows "QoS". Goal: Visualise bandwidth allocation. Interaction: Adjust priorities.
+        - Status "LEDs": Uses HTML/CSS to show Link status (Up/Down).
+        - Library: Chart.js for all graphs due to robust animation capabilities.
+    -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Navigation -->
+    <nav class="bg-slate-900 text-white sticky top-0 z-50 shadow-lg">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-network-wired text-cyan-400 text-xl"></i>
+                <span class="font-bold text-lg tracking-tight">IgorLima Network <span class="text-cyan-400">MikroTik</span></span>
+            </div>
+            <div class="hidden md:flex space-x-8 text-sm font-medium">
+                <a href="#dashboard" class="hover:text-cyan-400 transition">Monitoramento</a>
+                <a href="#seguranca" class="hover:text-cyan-400 transition">Segurança</a>
+                <a href="#redundancia" class="hover:text-cyan-400 transition">Disponibilidade</a>
+                <a href="#contato" class="bg-cyan-500 hover:bg-cyan-600 text-white px-4 py-2 rounded-full transition shadow-md">Fazer Diagnóstico</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="relative bg-slate-900 text-white overflow-hidden pb-20 pt-16">
+        <div class="absolute inset-0 tech-grid opacity-10"></div>
+        <div class="container mx-auto px-6 relative z-10 flex flex-col md:flex-row items-center">
+            <div class="md:w-1/2 mb-10 md:mb-0">
+                <div class="inline-block bg-cyan-900/30 border border-cyan-500/30 text-cyan-300 text-xs font-bold px-3 py-1 rounded-full mb-4">
+                    CONSULTORIA ESPECIALIZADA
+                </div>
+                <h1 class="text-4xl md:text-5xl font-bold leading-tight mb-6">
+                    Sua rede aguenta o <span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">crescimento</span> da sua empresa?
+                </h1>
+                <p class="text-lg text-slate-300 mb-8 max-w-lg">
+                    Instabilidade gera prejuízo. Como especialista licenciado MikroTik, transformo problemas de TI em soluções de alta performance, segurança e redundância.
+                </p>
+                <div class="flex space-x-4">
+                    <button onclick="document.getElementById('dashboard').scrollIntoView({behavior: 'smooth'})" class="bg-cyan-500 hover:bg-cyan-600 text-white font-bold py-3 px-8 rounded-lg shadow-lg hover:shadow-cyan-500/25 transition transform hover:-translate-y-1">
+                        Ver na Prática
+                    </button>
+                    <button onclick="document.getElementById('contato').scrollIntoView({behavior: 'smooth'})" class="border border-slate-600 hover:border-slate-400 text-slate-300 hover:text-white font-bold py-3 px-8 rounded-lg transition">
+                        Agendar Conversa
+                    </button>
+                </div>
+            </div>
+            <div class="md:w-1/2 flex justify-center">
+                <!-- Visual Metaphor: Network Topology -->
+                <div class="relative w-full max-w-md bg-slate-800 rounded-xl p-6 shadow-2xl border border-slate-700">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-2">
+                        <span class="text-xs font-mono text-cyan-400">STATUS DO SISTEMA</span>
+                        <span class="flex h-2 w-2 relative">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                    </div>
+                    <div class="space-y-4 font-mono text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Link Principal</span>
+                            <span class="text-green-400">CONECTADO (Fiber)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Link Backup</span>
+                            <span class="text-green-400">STANDBY (4G/Radio)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">VPN Tunnels</span>
+                            <span class="text-blue-400">3 ATIVOS (Encrypted)</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-400">Carga CPU</span>
+                            <div class="w-24 bg-slate-700 rounded-full h-4 mt-1">
+                                <div class="bg-cyan-500 h-4 rounded-full" style="width: 12%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Section: Dashboard & Monitoring -->
+    <section id="dashboard" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Gestão e Monitoramento em Tempo Real</h2>
+                <p class="text-slate-600 max-w-2xl mx-auto">
+                    Você não pode gerenciar o que não vê. Implemento dashboards detalhados para que você tenha controle total sobre o tráfego da sua empresa, identificando gargalos antes que eles parem sua operação.
+                </p>
+            </div>
+
+            <div class="bg-slate-50 rounded-2xl p-6 border border-slate-200 shadow-sm">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-chart-line text-blue-600"></i> Simulação de Tráfego de Rede
+                    </h3>
+                    <div class="flex gap-2 mt-4 md:mt-0">
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold border border-green-200">Live View</span>
+                        <span class="px-3 py-1 bg-white text-slate-600 rounded-full text-xs font-semibold border border-slate-200">Interface: Ether1-Gateway</span>
+                    </div>
+                </div>
+                
+                <div class="chart-wrapper">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 text-center">
+                        <p class="text-xs text-slate-500 uppercase font-bold">Download Atual</p>
+                        <p class="text-2xl font-bold text-blue-600" id="stat-down">0 Mbps</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 text-center">
+                        <p class="text-xs text-slate-500 uppercase font-bold">Upload Atual</p>
+                        <p class="text-2xl font-bold text-cyan-600" id="stat-up">0 Mbps</p>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-slate-200 text-center">
+                        <p class="text-xs text-slate-500 uppercase font-bold">Latência</p>
+                        <p class="text-2xl font-bold text-green-600" id="stat-ping">12 ms</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Availability & Redundancy -->
+    <section id="redundancia" class="py-20 bg-slate-50 border-t border-slate-200">
+        <div class="container mx-auto px-6">
+            <div class="flex flex-col lg:flex-row gap-12 items-center">
+                <div class="lg:w-1/2">
+                    <div class="inline-block bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full mb-4">
+                        DISPONIBILIDADE 24/7
+                    </div>
+                    <h2 class="text-3xl font-bold text-slate-900 mb-6">Redundância e Failover: Sua rede nunca para.</h2>
+                    <p class="text-slate-600 mb-6 leading-relaxed">
+                        Um único link de internet é um ponto único de falha. Minha configuração utiliza <strong>Load Balancing</strong> e <strong>Failover automático</strong>. Se o link principal cair, o secundário assume instantaneamente.
+                    </p>
+                    
+                    <div class="bg-white p-6 rounded-xl border-l-4 border-blue-500 shadow-sm mb-6">
+                        <h4 class="font-bold text-slate-800 mb-2">O que eu entrego:</h4>
+                        <ul class="space-y-2 text-slate-600">
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Troca automática de links (Failover)</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Balanceamento de carga inteligente (PCC)</li>
+                            <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> Notificação de queda via Telegram/Email</li>
+                        </ul>
+                    </div>
+
+                    <button id="simFailoverBtn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition flex items-center gap-2">
+                        <i class="fa-solid fa-scissors"></i> Simular Corte no Link Principal
+                    </button>
+                    <p class="text-xs text-slate-500 mt-2 italic">Clique para ver a redundância em ação no gráfico ao lado.</p>
+                </div>
+
+                <div class="lg:w-1/2 w-full">
+                    <div class="bg-white rounded-xl shadow-lg p-6 border border-slate-200">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-slate-700">Monitor de Disponibilidade</h3>
+                            <span id="systemStatus" class="px-2 py-1 bg-green-100 text-green-700 text-xs rounded font-bold">SISTEMA ESTÁVEL</span>
+                        </div>
+                        
+                        <div class="chart-wrapper">
+                            <canvas id="failoverChart"></canvas>
+                        </div>
+
+                        <!-- Link Status Visualizers -->
+                        <div class="grid grid-cols-2 gap-4 mt-4">
+                            <div id="link1-card" class="p-3 rounded border border-green-200 bg-green-50 flex items-center justify-between transition-colors duration-300">
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-500">ISP 1 (Fibra)</span>
+                                    <span id="link1-text" class="text-sm font-bold text-green-700">Online</span>
+                                </div>
+                                <i id="link1-icon" class="fa-solid fa-wifi text-green-500"></i>
+                            </div>
+                            <div id="link2-card" class="p-3 rounded border border-slate-200 bg-slate-50 flex items-center justify-between transition-colors duration-300">
+                                <div>
+                                    <span class="block text-xs font-bold text-slate-500">ISP 2 (Backup)</span>
+                                    <span id="link2-text" class="text-sm font-bold text-slate-700">Standby / Ativo</span>
+                                </div>
+                                <i id="link2-icon" class="fa-solid fa-satellite-dish text-slate-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Security & VPN -->
+    <section id="seguranca" class="py-20 bg-white">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 mb-4">Proteção Robusta: Firewall & VPN</h2>
+                <p class="text-slate-600 max-w-2xl mx-auto">
+                    Acesso remoto seguro para home office e bloqueio de tentativas de intrusão. Transforme sua rede em uma fortaleza digital.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                <!-- Interactive Firewall Demo -->
+                <div class="bg-slate-900 rounded-2xl p-8 text-white shadow-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-20">
+                        <i class="fa-solid fa-shield-halved text-9xl"></i>
+                    </div>
+                    
+                    <h3 class="text-2xl font-bold mb-4 z-10 relative">Simulador de Firewall</h3>
+                    <p class="text-slate-400 mb-6 z-10 relative text-sm">
+                        Redes sem proteção adequada sofrem milhares de scans e tentativas de acesso diariamente. Veja o impacto de um Firewall MikroTik bem configurado.
+                    </p>
+
+                    <div class="flex items-center justify-between mb-6 z-10 relative bg-slate-800 p-4 rounded-lg">
+                        <span class="font-bold text-cyan-400">Status do Firewall:</span>
+                        <button id="toggleFirewall" class="bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-4 rounded transition">
+                            DESATIVADO
+                        </button>
+                    </div>
+
+                    <div class="chart-wrapper" style="height: 250px;">
+                        <canvas id="securityChart"></canvas>
+                    </div>
+                    
+                    <div class="mt-4 z-10 relative text-xs text-center text-slate-500">
+                        *Dados ilustrativos de tentativas de conexão por minuto
+                    </div>
+                </div>
+
+                <!-- Features List -->
+                <div class="flex flex-col justify-center space-y-8">
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-lock text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-slate-900">VPNs Seguras (L2TP/IPsec, WireGuard)</h4>
+                            <p class="text-slate-600 mt-2">
+                                Interligue filiais e permita que colaboradores trabalhem de casa como se estivessem no escritório, com túneis criptografados de alta performance.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-filter text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-slate-900">Filtros de Conteúdo e Aplicação</h4>
+                            <p class="text-slate-600 mt-2">
+                                Bloqueie sites maliciosos, redes sociais em horário de trabalho ou aplicações que drenam a produtividade da equipe.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <div class="w-12 h-12 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
+                            <i class="fa-solid fa-user-shield text-blue-600 text-xl"></i>
+                        </div>
+                        <div>
+                            <h4 class="text-xl font-bold text-slate-900">Gestão de Identidade</h4>
+                            <p class="text-slate-600 mt-2">
+                                Controle exatamente quem acessa o quê na sua rede. Segmentação de redes (VLANs) para visitantes, financeiro e operações.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section: Why MikroTik -->
+    <section class="py-20 bg-slate-50">
+        <div class="container mx-auto px-6">
+            <h2 class="text-3xl font-bold text-center text-slate-900 mb-12">Por que escolher MikroTik?</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition border-t-4 border-cyan-500">
+                    <div class="mb-4 text-cyan-600 text-3xl">
+                        <i class="fa-solid fa-sack-dollar"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Custo-Benefício Imbatível</h3>
+                    <p class="text-slate-600">
+                        Soluções de nível Enterprise por uma fração do custo de grandes marcas (Cisco/Juniper), sem taxas de licenciamento anual recorrentes.
+                    </p>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition border-t-4 border-blue-500">
+                    <div class="mb-4 text-blue-600 text-3xl">
+                        <i class="fa-solid fa-microchip"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Performance Extrema</h3>
+                    <p class="text-slate-600">
+                        Hardware robusto com alta capacidade de processamento de pacotes (PPS), ideal para tráfego intenso e múltiplas regras de firewall.
+                    </p>
+                </div>
+
+                <div class="bg-white p-8 rounded-xl shadow-sm hover:shadow-md transition border-t-4 border-indigo-500">
+                    <div class="mb-4 text-indigo-600 text-3xl">
+                        <i class="fa-solid fa-sliders"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3">Flexibilidade Total</h3>
+                    <p class="text-slate-600">
+                        O RouterOS permite configurar cada detalhe da sua rede. Roteamento dinâmico, scripts de automação e integração total.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer / Contact -->
+    <footer id="contato" class="bg-slate-900 text-white py-16">
+        <div class="container mx-auto px-6 text-center">
+            <h2 class="text-3xl font-bold mb-6">Vamos conversar sobre o seu projeto?</h2>
+            <p class="text-slate-400 max-w-xl mx-auto mb-10">
+                Não espere a rede parar para buscar uma solução. Agende um diagnóstico gratuito da sua infraestrutura hoje mesmo.
+            </p>
+            
+            <div class="flex flex-col md:flex-row justify-center gap-6 mb-12">
+                <a href="#" class="flex items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white font-bold py-4 px-8 rounded-lg transition transform hover:-translate-y-1">
+                    <i class="fa-brands fa-whatsapp text-xl"></i> Falar no WhatsApp
+                </a>
+                <a href="#" class="flex items-center justify-center gap-3 bg-slate-700 hover:bg-slate-600 text-white font-bold py-4 px-8 rounded-lg transition transform hover:-translate-y-1">
+                    <i class="fa-solid fa-envelope text-xl"></i> Enviar E-mail
+                </a>
+            </div>
+
+            <div class="border-t border-slate-800 pt-8 text-sm text-slate-500">
+                <p>&copy; 2023 Consultoria de Redes Especializada. Todos os direitos reservados.</p>
+                <p class="mt-2">Licenciado MikroTik | Projetos de Alta Complexidade</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        // --- 1. Real-time Traffic Simulation (The Dashboard) ---
+        const trafficCtx = document.getElementById('trafficChart').getContext('2d');
+        
+        // Initial Data
+        const initialDataLength = 20;
+        const labels = Array.from({length: initialDataLength}, (_, i) => i);
+        const downloadData = Array.from({length: initialDataLength}, () => Math.floor(Math.random() * 50) + 10);
+        const uploadData = Array.from({length: initialDataLength}, () => Math.floor(Math.random() * 20) + 5);
+
+        const trafficChart = new Chart(trafficCtx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Download (Mbps)',
+                        data: downloadData,
+                        borderColor: '#0ea5e9', // cyan-500
+                        backgroundColor: 'rgba(14, 165, 233, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Upload (Mbps)',
+                        data: uploadData,
+                        borderColor: '#6366f1', // indigo-500
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: { duration: 1000, easing: 'linear' },
+                scales: {
+                    x: { display: false },
+                    y: { 
+                        beginAtZero: true, 
+                        max: 100,
+                        grid: { color: '#f1f5f9' }
+                    }
+                },
+                plugins: {
+                    legend: { position: 'top' },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                interaction: { mode: 'nearest', axis: 'x', intersect: false }
+            }
+        });
+
+        // Update Logic for Traffic
+        setInterval(() => {
+            // Remove oldest
+            trafficChart.data.datasets[0].data.shift();
+            trafficChart.data.datasets[1].data.shift();
+            
+            // Add newest (Random variations)
+            const newDown = Math.floor(Math.random() * 60) + 20; // 20-80 Mbps
+            const newUp = Math.floor(Math.random() * 30) + 5;   // 5-35 Mbps
+            
+            trafficChart.data.datasets[0].data.push(newDown);
+            trafficChart.data.datasets[1].data.push(newUp);
+            
+            trafficChart.update('none'); // 'none' for performance
+
+            // Update Text Stats
+            document.getElementById('stat-down').innerText = newDown + " Mbps";
+            document.getElementById('stat-up').innerText = newUp + " Mbps";
+            // Random ping variation
+            document.getElementById('stat-ping').innerText = (Math.floor(Math.random() * 5) + 8) + " ms";
+
+        }, 1500);
+
+        // --- 2. Availability / Failover Simulation ---
+        const failoverCtx = document.getElementById('failoverChart').getContext('2d');
+        let isMainLinkDown = false;
+        
+        // Data structure for Failover
+        const failLabels = Array.from({length: 20}, (_, i) => i);
+        const link1Data = Array.from({length: 20}, () => 80); // Healthy link
+        const link2Data = Array.from({length: 20}, () => 0);  // Backup idle
+
+        const failoverChart = new Chart(failoverCtx, {
+            type: 'line',
+            data: {
+                labels: failLabels,
+                datasets: [
+                    {
+                        label: 'Link 1 (Principal)',
+                        data: link1Data,
+                        borderColor: '#22c55e', // green-500
+                        backgroundColor: 'rgba(34, 197, 94, 0.2)',
+                        fill: true,
+                        tension: 0.1,
+                        borderWidth: 2,
+                        pointRadius: 0
+                    },
+                    {
+                        label: 'Link 2 (Backup)',
+                        data: link2Data,
+                        borderColor: '#fbbf24', // amber-400
+                        backgroundColor: 'rgba(251, 191, 36, 0.2)',
+                        fill: true,
+                        tension: 0.1,
+                        borderWidth: 2,
+                        pointRadius: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { display: false },
+                    y: { 
+                        beginAtZero: true, 
+                        max: 100,
+                        title: { display: true, text: 'Uso de Banda %' }
+                    }
+                },
+                animation: { duration: 500 }
+            }
+        });
+
+        // Failover Logic Loop
+        setInterval(() => {
+            failoverChart.data.datasets[0].data.shift();
+            failoverChart.data.datasets[1].data.shift();
+
+            if (isMainLinkDown) {
+                // Link 1 is down (0), Link 2 takes load (80 +/- random)
+                failoverChart.data.datasets[0].data.push(0);
+                failoverChart.data.datasets[1].data.push(80 + Math.random() * 10);
+            } else {
+                // Link 1 is up (80 +/- random), Link 2 is idle (0)
+                failoverChart.data.datasets[0].data.push(80 + Math.random() * 10);
+                failoverChart.data.datasets[1].data.push(0);
+            }
+            failoverChart.update('none');
+        }, 800);
+
+        // Interaction Handler for Failover Button
+        document.getElementById('simFailoverBtn').addEventListener('click', function() {
+            isMainLinkDown = !isMainLinkDown;
+            const btn = this;
+            const systemStatus = document.getElementById('systemStatus');
+            
+            // UI References
+            const l1Card = document.getElementById('link1-card');
+            const l1Text = document.getElementById('link1-text');
+            const l1Icon = document.getElementById('link1-icon');
+            
+            const l2Card = document.getElementById('link2-card');
+            const l2Text = document.getElementById('link2-text');
+            const l2Icon = document.getElementById('link2-icon');
+
+            if (isMainLinkDown) {
+                // State: BROKEN
+                btn.innerHTML = '<i class="fa-solid fa-rotate-left"></i> Restaurar Link Principal';
+                btn.className = "bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition flex items-center gap-2";
+                
+                systemStatus.innerText = "FAILOVER ATIVO";
+                systemStatus.className = "px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded font-bold animate-pulse";
+
+                // Update Cards
+                l1Card.className = "p-3 rounded border border-red-200 bg-red-50 flex items-center justify-between";
+                l1Text.innerText = "Offline (Falha)";
+                l1Text.className = "text-sm font-bold text-red-600";
+                l1Icon.className = "fa-solid fa-triangle-exclamation text-red-500";
+
+                l2Card.className = "p-3 rounded border border-green-200 bg-green-50 flex items-center justify-between shadow-md transform scale-105";
+                l2Text.innerText = "ATIVO (Assumindo Carga)";
+                l2Text.className = "text-sm font-bold text-green-700";
+                l2Icon.className = "fa-solid fa-bolt text-green-500";
+
+            } else {
+                // State: NORMAL
+                btn.innerHTML = '<i class="fa-solid fa-scissors"></i> Simular Corte no Link Principal';
+                btn.className = "bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-6 rounded-lg shadow-lg transition flex items-center gap-2";
+                
+                systemStatus.innerText = "SISTEMA ESTÁVEL";
+                systemStatus.className = "px-2 py-1 bg-green-100 text-green-700 text-xs rounded font-bold";
+
+                // Update Cards
+                l1Card.className = "p-3 rounded border border-green-200 bg-green-50 flex items-center justify-between";
+                l1Text.innerText = "Online";
+                l1Text.className = "text-sm font-bold text-green-700";
+                l1Icon.className = "fa-solid fa-wifi text-green-500";
+
+                l2Card.className = "p-3 rounded border border-slate-200 bg-slate-50 flex items-center justify-between";
+                l2Text.innerText = "Standby";
+                l2Text.className = "text-sm font-bold text-slate-700";
+                l2Icon.className = "fa-solid fa-satellite-dish text-slate-400";
+            }
+        });
+
+
+        // --- 3. Security Firewall Simulation ---
+        const securityCtx = document.getElementById('securityChart').getContext('2d');
+        let firewallActive = false;
+
+        const secData = {
+            labels: ['00:00', '00:05', '00:10', '00:15', '00:20', '00:25'],
+            datasets: [
+                {
+                    label: 'Conexões Bloqueadas (Firewall)',
+                    data: [5, 8, 12, 6, 9, 7],
+                    backgroundColor: 'rgba(239, 68, 68, 0.7)', // Red
+                    stack: 'Stack 0',
+                },
+                {
+                    label: 'Conexões Permitidas (Legítimas)',
+                    data: [80, 85, 90, 82, 88, 85],
+                    backgroundColor: 'rgba(34, 197, 94, 0.7)', // Green
+                    stack: 'Stack 0',
+                },
+                {
+                    label: 'Intrusões Bem Sucedidas (Risco)',
+                    data: [15, 20, 18, 22, 19, 25], // High risk initially
+                    backgroundColor: 'rgba(249, 115, 22, 0.7)', // Orange
+                    stack: 'Stack 0',
+                }
+            ]
+        };
+
+        const securityChart = new Chart(securityCtx, {
+            type: 'bar',
+            data: secData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, beginAtZero: true }
+                }
+            }
+        });
+
+        document.getElementById('toggleFirewall').addEventListener('click', function() {
+            firewallActive = !firewallActive;
+            const btn = this;
+
+            if (firewallActive) {
+                // Activate Firewall
+                btn.innerText = "ATIVADO - PROTEÇÃO TOTAL";
+                btn.className = "bg-green-500 hover:bg-green-600 text-white text-sm font-bold py-2 px-4 rounded transition shadow-lg";
+                
+                // Update Data: Intrusions drop to 0, Blocked goes up
+                securityChart.data.datasets[2].data = [0, 0, 0, 0, 0, 0]; // Intrusions
+                securityChart.data.datasets[0].data = [20, 28, 30, 28, 28, 32]; // Blocked (caught by firewall)
+                securityChart.data.datasets[1].data = [80, 85, 90, 82, 88, 85]; // Legitimate traffic stays same
+                
+            } else {
+                // Deactivate
+                btn.innerText = "DESATIVADO - RISCO ALTO";
+                btn.className = "bg-red-500 hover:bg-red-600 text-white text-sm font-bold py-2 px-4 rounded transition";
+                
+                // Revert Data
+                securityChart.data.datasets[2].data = [15, 20, 18, 22, 19, 25]; 
+                securityChart.data.datasets[0].data = [5, 8, 12, 6, 9, 7];
+            }
+            securityChart.update();
+        });
+
+    </script>
+</body>
+</html>
